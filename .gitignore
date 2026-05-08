@@ -1,0 +1,5 @@
+node_modules/
+dist/
+.env
+.codex/
+npm-debug.log*
