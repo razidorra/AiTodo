@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="de" data-theme="winter">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TodoFlow</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script type="module" src="./app.js"></script>
+    <script type="module" src="./auth-nav.js"></script>
+  </head>
+  <body class="min-h-screen bg-base-200 text-base-content">
+    <div class="drawer lg:drawer-open">
+      <input id="app-drawer" type="checkbox" class="drawer-toggle" />
+
+      <div class="drawer-content min-h-screen">
+        <header class="sticky top-0 z-20 border-b border-base-300 bg-base-100/95 backdrop-blur">
+          <div class="navbar mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="navbar-start gap-2">
+              <label for="app-drawer" class="btn btn-square btn-ghost lg:hidden" aria-label="Menü öffnen">
+                <span class="text-xl">☰</span>
+              </label>
+              <div>
+                <p class="text-xs font-semibold uppercase text-primary">Workspace</p>
+                <h1 class="text-lg font-bold sm:text-2xl">TodoFlow</h1>
+              </div>
+            </div>
+            <div class="navbar-end gap-2">
+              <div id="auth-actions" class="flex gap-2">
+                <a class="btn btn-outline btn-sm" data-auth-login href="./login.html">Login</a>
+                <a class="btn btn-primary btn-sm" data-auth-register href="./register.html">Register</a>
+              </div>
+              <span id="nav-user-email" class="badge badge-outline hidden max-w-40 truncate"></span>
+              <button id="logout-button" class="btn btn-outline btn-sm hidden" type="button">Logout</button>
+              <button class="btn btn-primary btn-sm" type="button" form="todo-form">Neue Aufgabe</button>
+            </div>
+          </div>
+        </header>
+
+        <main class="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:px-8">
+          <section class="flex flex-col gap-6">
+            <section class="rounded-lg bg-base-100 p-5 shadow">
+              <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h2 class="text-2xl font-bold">Meine Todo-Liste</h2>
+                  <p class="mt-1 max-w-2xl text-sm text-base-content/70">
+                    Plane Aufgaben, teile sie mit deinem Team und behalte offene Punkte im Blick.
+                  </p>
+                  <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
+                    <form id="guest-username-form" class="flex flex-1 flex-col gap-2 sm:max-w-md sm:flex-row sm:items-end">
+                      <label class="form-control flex-1">
+                        <span class="label">
+                          <span class="label-text">Gast-Username</span>
+                        </span>
+                        <input id="guest-username-input" class="input input-bordered input-sm" autocomplete="username" />
+                      </label>
+                      <button class="btn btn-outline btn-sm" type="submit">Gastliste öffnen</button>
+                    </form>
+                    <span id="workspace-owner-label" class="badge badge-outline hidden max-w-full truncate"></span>
+                  </div>
+                </div>
+                <div class="stats stats-vertical shadow sm:stats-horizontal">
+                  <div class="stat">
+                    <div class="stat-title">Offen</div>
+                    <div id="open-count" class="stat-value text-primary">0</div>
+                  </div>
+                  <div class="stat">
+                    <div class="stat-title">Erledigt</div>
+                    <div id="done-count" class="stat-value text-secondary">0</div>
+                  </div>
+                  <div class="stat">
+                    <div class="stat-title">Team</div>
+                    <div id="team-count" class="stat-value">0</div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section class="grid gap-6 xl:grid-cols-[minmax(300px,380px)_1fr]">
+              <form id="todo-form" class="rounded-lg bg-base-100 p-5 shadow">
+                <div class="flex flex-col gap-4">
+                  <div>
+                    <h2 class="text-lg font-semibold">Aufgabe erstellen</h2>
+                    <p class="text-sm text-base-content/60">Neue Arbeit landet sofort in deiner Liste.</p>
+                  </div>
+                  <label class="form-control">
+                    <span class="label">
+                      <span class="label-text">Titel</span>
+                    </span>
+                    <input id="title-input" name="title" class="input input-bordered" autocomplete="off" required />
+                  </label>
+                  <label class="form-control">
+                    <span class="label">
+                      <span class="label-text">Beschreibung</span>
+                    </span>
+                    <textarea id="description-input" name="description" class="textarea textarea-bordered min-h-28"></textarea>
+                  </label>
+                  <button class="btn btn-primary" type="submit">Hinzufügen</button>
+                  <p id="form-message" class="min-h-5 text-sm text-error" role="status"></p>
+                </div>
+              </form>
+
+              <section class="flex min-w-0 flex-col gap-4">
+                <div class="flex flex-col gap-3 rounded-lg bg-base-100 p-4 shadow sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 class="text-lg font-semibold">Aufgaben</h2>
+                    <p class="text-sm text-base-content/60">Sortiert nach Erstellung</p>
+                  </div>
+                  <div class="join">
+                    <button class="btn join-item btn-sm" data-filter="all" type="button">Alle</button>
+                    <button class="btn join-item btn-sm" data-filter="open" type="button">Offen</button>
+                    <button class="btn join-item btn-sm" data-filter="done" type="button">Erledigt</button>
+                  </div>
+                </div>
+                <div id="todo-list" class="grid gap-3"></div>
+                <div id="empty-state" class="hidden rounded-lg border border-dashed border-base-300 bg-base-100 p-8 text-center">
+                  <p class="font-medium">Keine Aufgaben gefunden</p>
+                  <p class="mt-1 text-sm text-base-content/60">Erstelle eine Aufgabe oder wechsle den Filter.</p>
+                </div>
+              </section>
+            </section>
+          </section>
+
+          <aside class="flex flex-col gap-6">
+            <section class="rounded-lg bg-base-100 p-5 shadow">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <h2 class="text-lg font-semibold">Team einladen</h2>
+                  <p class="text-sm text-base-content/60">Mitglieder haben Zugriff auf die gemeinsame Todo-Liste. Sie werden nicht pro Aufgabe erwähnt.</p>
+                </div>
+              </div>
+              <form id="collaborator-form" class="mt-4 flex flex-col gap-3">
+                <div id="collaborator-locked-message" class="alert alert-warning">
+                  <span>Bitte logge dich ein, um Personen zur Todo-Liste hinzuzufügen.</span>
+                </div>
+                <label class="form-control">
+                  <span class="label">
+                    <span class="label-text">Username</span>
+                  </span>
+                  <input id="collaborator-username-input" class="input input-bordered" autocomplete="off" required />
+                </label>
+                <label class="form-control">
+                  <span class="label">
+                    <span class="label-text">E-Mail-Adresse für Einladung</span>
+                  </span>
+                  <input id="collaborator-email-input" type="email" class="input input-bordered" autocomplete="email" required />
+                </label>
+                <button class="btn btn-secondary" type="submit">Person hinzufügen</button>
+                <p id="collaborator-message" class="min-h-5 text-sm" role="status"></p>
+              </form>
+            </section>
+
+            <section class="rounded-lg bg-base-100 p-5 shadow">
+              <div class="flex items-center justify-between">
+                <h2 class="text-lg font-semibold">Personen</h2>
+                <span id="collaborator-total" class="badge badge-primary">0</span>
+              </div>
+              <div id="collaborator-list" class="mt-4 flex flex-col gap-3"></div>
+              <div id="collaborator-empty-state" class="mt-4 rounded-lg border border-dashed border-base-300 p-5 text-center text-sm text-base-content/60">
+                Noch niemand hinzugefügt.
+              </div>
+            </section>
+          </aside>
+        </main>
+      </div>
+
+      <div class="drawer-side">
+        <label for="app-drawer" aria-label="Menü schließen" class="drawer-overlay"></label>
+        <aside class="min-h-full w-72 bg-base-100 p-5">
+          <div class="mb-8">
+            <p class="text-xs font-semibold uppercase text-primary">TodoFlow</p>
+            <p class="text-xl font-bold">Team Workspace</p>
+          </div>
+          <ul class="menu gap-1">
+            <li><a class="active">Aufgaben</a></li>
+              <li><a href="./register.html">Register</a></li>
+              <li><a href="./login.html">Login</a></li>
+          </ul>
+        </aside>
+      </div>
+    </div>
+  </body>
+</html>

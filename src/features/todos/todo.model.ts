@@ -2,6 +2,7 @@ import { model, models, Schema, type HydratedDocument, type Model } from "mongoo
 import type { Todo } from "../types/todo.types";
 
 type TodoFields = {
+  ownerKey: string;
   title: string;
   description: string;
   completed: boolean;
@@ -13,6 +14,12 @@ export type TodoDocument = HydratedDocument<TodoFields>;
 
 const todoMongooseSchema = new Schema<TodoFields>(
   {
+    ownerKey: {
+      type: String,
+      required: true,
+      trim: true,
+      index: true,
+    },
     title: {
       type: String,
       required: true,

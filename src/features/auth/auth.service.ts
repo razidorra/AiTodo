@@ -30,6 +30,10 @@ function createToken(user: AuthUser): string {
   );
 }
 
+function isDuplicateKeyError(error: unknown): boolean {
+  return typeof error === "object" && error !== null && "code" in error && error.code === 11000;
+}
+
 export async function register(payload: unknown): Promise<AuthResponse> {
   const data = validateRegister(payload);
   const existingUser = await authRepository.findByEmail(data.email);
@@ -39,7 +43,17 @@ export async function register(payload: unknown): Promise<AuthResponse> {
   }
 
   const passwordHash = await bcrypt.hash(data.password, passwordSaltRounds);
-  const user = await authRepository.createUser(data.email, passwordHash);
+  let user: AuthUser;
+
+  try {
+    user = await authRepository.createUser(data.email, passwordHash);
+  } catch (error) {
+    if (isDuplicateKeyError(error)) {
+      throw new AppError("Email already registered", 409);
+    }
+
+    throw error;
+  }
 
   return {
     user: toPublicUser(user),

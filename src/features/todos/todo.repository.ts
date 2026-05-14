@@ -3,7 +3,11 @@ import mongoose from "mongoose";
 import type { CreateTodoInput, Todo, UpdateTodoInput } from "../types/todo.types";
 import { TodoModel, toTodo } from "./todo.model";
 
-let todos: Todo[] = [];
+type StoredTodo = Todo & {
+  ownerKey: string;
+};
+
+let todos: StoredTodo[] = [];
 
 function now(): string {
   return new Date().toISOString();
@@ -13,37 +17,53 @@ function hasDatabaseConnection(): boolean {
   return mongoose.connection.readyState === 1;
 }
 
-export async function findAll(): Promise<Todo[]> {
+function toPublicTodo(todo: StoredTodo): Todo {
+  return {
+    id: todo.id,
+    title: todo.title,
+    description: todo.description,
+    completed: todo.completed,
+    createdAt: todo.createdAt,
+    updatedAt: todo.updatedAt,
+  };
+}
+
+export async function findAll(ownerKey: string): Promise<Todo[]> {
   if (hasDatabaseConnection()) {
-    const documents = await TodoModel.find().sort({ createdAt: 1 });
+    const documents = await TodoModel.find({ ownerKey }).sort({ createdAt: 1 });
     return documents.map(toTodo);
   }
 
-  return todos;
+  return todos.filter((todo) => todo.ownerKey === ownerKey).map(toPublicTodo);
 }
 
-export async function findById(id: string): Promise<Todo | null> {
+export async function findById(ownerKey: string, id: string): Promise<Todo | null> {
   if (hasDatabaseConnection()) {
     if (!mongoose.isValidObjectId(id)) {
       return null;
     }
 
-    const document = await TodoModel.findById(id);
+    const document = await TodoModel.findOne({ _id: id, ownerKey });
     return document ? toTodo(document) : null;
   }
 
-  return todos.find((todo) => todo.id === id) || null;
+  const todo = todos.find((currentTodo) => currentTodo.ownerKey === ownerKey && currentTodo.id === id);
+  return todo ? toPublicTodo(todo) : null;
 }
 
-export async function create(data: CreateTodoInput): Promise<Todo> {
+export async function create(ownerKey: string, data: CreateTodoInput): Promise<Todo> {
   if (hasDatabaseConnection()) {
-    const document = await TodoModel.create(data);
+    const document = await TodoModel.create({
+      ...data,
+      ownerKey,
+    });
     return toTodo(document);
   }
 
   const timestamp = now();
-  const todo: Todo = {
+  const todo: StoredTodo = {
     id: randomUUID(),
+    ownerKey,
     title: data.title,
     description: data.description,
     completed: false,
@@ -52,16 +72,16 @@ export async function create(data: CreateTodoInput): Promise<Todo> {
   };
 
   todos.push(todo);
-  return todo;
+  return toPublicTodo(todo);
 }
 
-export async function update(id: string, updates: UpdateTodoInput): Promise<Todo | null> {
+export async function update(ownerKey: string, id: string, updates: UpdateTodoInput): Promise<Todo | null> {
   if (hasDatabaseConnection()) {
     if (!mongoose.isValidObjectId(id)) {
       return null;
     }
 
-    const document = await TodoModel.findByIdAndUpdate(id, updates, {
+    const document = await TodoModel.findOneAndUpdate({ _id: id, ownerKey }, updates, {
       new: true,
       runValidators: true,
     });
@@ -69,7 +89,7 @@ export async function update(id: string, updates: UpdateTodoInput): Promise<Todo
     return document ? toTodo(document) : null;
   }
 
-  const todo = todos.find((currentTodo) => currentTodo.id === id) || null;
+  const todo = todos.find((currentTodo) => currentTodo.ownerKey === ownerKey && currentTodo.id === id) || null;
 
   if (!todo) {
     return null;
@@ -79,21 +99,21 @@ export async function update(id: string, updates: UpdateTodoInput): Promise<Todo
     updatedAt: now(),
   });
 
-  return todo;
+  return toPublicTodo(todo);
 }
 
-export async function remove(id: string): Promise<boolean> {
+export async function remove(ownerKey: string, id: string): Promise<boolean> {
   if (hasDatabaseConnection()) {
     if (!mongoose.isValidObjectId(id)) {
       return false;
     }
 
-    const document = await TodoModel.findByIdAndDelete(id);
+    const document = await TodoModel.findOneAndDelete({ _id: id, ownerKey });
     return Boolean(document);
   }
 
   const initialLength = todos.length;
-  todos = todos.filter((todo) => todo.id !== id);
+  todos = todos.filter((todo) => todo.ownerKey !== ownerKey || todo.id !== id);
 
   return todos.length !== initialLength;
 }
