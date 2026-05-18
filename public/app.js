@@ -118,10 +118,10 @@ function showLockedGuestWorkspace() {
 
 function createTodoElement(todo) {
   const item = document.createElement("article");
-  item.className = "rounded-lg bg-base-100 p-5 shadow transition hover:shadow-md";
+  item.className = "rounded-lg bg-base-100 p-4 shadow transition hover:shadow-md sm:p-5";
 
   const header = document.createElement("div");
-  header.className = "flex items-start gap-3";
+  header.className = "flex flex-wrap items-start gap-3";
 
   const checkbox = document.createElement("input");
   checkbox.type = "checkbox";
@@ -143,7 +143,7 @@ function createTodoElement(todo) {
 
   const actions = document.createElement("button");
   actions.type = "button";
-  actions.className = "btn btn-ghost btn-sm text-error";
+  actions.className = "btn btn-ghost btn-sm w-full basis-full text-error sm:w-auto sm:basis-auto";
   actions.textContent = "Löschen";
   actions.addEventListener("click", () => deleteTodo(todo.id));
 

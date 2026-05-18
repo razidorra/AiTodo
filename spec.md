@@ -1,6 +1,6 @@
 # Todo App Specification
 
-Stand: 2026-05-14
+Stand: 2026-05-15
 
 ## Ziel
 
@@ -28,12 +28,13 @@ Bereits umgesetzt:
 16. Build-Script mit TypeScript-Ausgabe nach `dist/`
 17. ESLint Setup mit Flat Config
 18. Projekt-Skills für Express REST API, Mongoose/MongoDB und TDD installiert
-19. Statisches HTML-Frontend unter `/` mit DaisyUI und Todo-API-Anbindung
-20. Clerk-Registrierungsseite unter `/register` und Login-Seite unter `/login` mit ClerkJS und öffentlicher Client-Config
+19. Statisches responsive HTML-Frontend unter `/` mit DaisyUI und Todo-API-Anbindung
+20. Responsive Clerk-Registrierungsseite unter `/register` und Login-Seite unter `/login` mit ClerkJS und öffentlicher Client-Config
 21. Collaborator API unter `/api/collaborators` zum einmaligen Hinzufügen von Personen per E-Mail
 22. Todo-Listen sind pro Besitzer getrennt: eingeloggte Nutzer verwenden `user:<email>`, Gäste verwenden `guest:<username>`
 23. Frontend-Gäste können einen Gast-Username setzen und damit eine eigene Todo-Liste verwenden
 24. ClerkJS lädt das separate Clerk UI Bundle, damit `mountSignIn` und `mountSignUp` funktionieren
+25. Mobile Layouts brechen Header-Aktionen, Statistikbereich, Filter, Formulare und Todo-Karten sauber um
 
 Noch offen:
 
@@ -584,11 +585,11 @@ Definiert TypeScript-Typen für Personen, die per E-Mail zur Todo-Seite hinzugef
 
 ### `public/index.html`
 
-Definiert das responsive DaisyUI-Frontend für TodoFlow mit Aufgaben, Team-Bereich, Statistiken und Navigation. Collaborators werden als Workspace-Mitglieder angezeigt, aber nicht automatisch auf einzelnen Aufgaben erwähnt. Gäste können Todos nutzen; Personen hinzufügen ist in der Oberfläche nur für eingeloggte Nutzer freigeschaltet. Die Oberfläche zeigt für hinzugefügte Personen keine E-Mail-Adressen oder internen IDs an.
+Definiert das responsive DaisyUI-Frontend für TodoFlow mit Aufgaben, Team-Bereich, Statistiken und Navigation. Header-Aktionen, Gast-Username-Formular, Statistikbereich, Filterleiste, Todo-Karten und Collaborator-Formular sind für kleine Bildschirme optimiert und brechen ohne horizontales Quetschen um. Collaborators werden als Workspace-Mitglieder angezeigt, aber nicht automatisch auf einzelnen Aufgaben erwähnt. Gäste können Todos nutzen; Personen hinzufügen ist in der Oberfläche nur für eingeloggte Nutzer freigeschaltet. Die Oberfläche zeigt für hinzugefügte Personen keine E-Mail-Adressen oder internen IDs an.
 
 ### `public/app.js`
 
-Steuert die Todo- und Collaborator-Oberfläche im Browser über die REST API.
+Steuert die Todo- und Collaborator-Oberfläche im Browser über die REST API. Dynamisch erzeugte Todo-Karten verwenden responsive Klassen, damit Text und Aktionen auf mobilen Bildschirmen sauber umbrechen.
 
 ### `public/api-client.js`
 
@@ -596,7 +597,7 @@ Kapselt Browser-Requests an die Backend-API und unterstützt lokale Live-Server-
 
 ### `public/login.html` und `public/register.html`
 
-Definieren getrennte Clerk-Seiten für Login und Registrierung.
+Definieren getrennte responsive Clerk-Seiten für Login und Registrierung. Die Layouts verwenden mobile Abstände, flexible Spaltenbreiten und gekürzte E-Mail-Anzeigen, damit Clerk-Widgets und Account-Hinweise nicht überlaufen.
 
 ### `public/clerk-auth.js` und `public/clerk-register.js`
 

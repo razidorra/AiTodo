@@ -9,12 +9,12 @@
     <script type="module" src="./clerk-register.js"></script>
   </head>
   <body class="min-h-screen bg-base-200 text-base-content">
-    <main class="mx-auto grid min-h-screen w-full max-w-6xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[1fr_440px] lg:items-center lg:px-8">
-      <section class="flex flex-col gap-5">
+    <main class="mx-auto grid min-h-screen w-full max-w-6xl gap-5 px-3 py-5 sm:gap-6 sm:px-6 sm:py-6 lg:grid-cols-[minmax(0,1fr)_minmax(340px,440px)] lg:items-center lg:px-8">
+      <section class="flex min-w-0 flex-col gap-5">
         <a class="link link-hover w-fit text-sm font-semibold text-primary" href="./index.html">Zur Todo App</a>
         <div class="max-w-2xl">
           <p class="text-sm font-semibold uppercase tracking-wide text-primary">TodoFlow Account</p>
-          <h1 class="mt-2 text-4xl font-bold sm:text-5xl">Registrieren</h1>
+          <h1 class="mt-2 text-3xl font-bold sm:text-5xl">Registrieren</h1>
           <p class="mt-4 max-w-xl text-base leading-7 text-base-content/70">
             Erstelle zuerst deinen Account mit deiner E-Mail-Adresse. Dieselbe E-Mail kann nur einmal registriert werden.
           </p>
@@ -24,10 +24,10 @@
           </div>
         </div>
         <div id="signed-in-panel" class="hidden max-w-md rounded-lg bg-base-100 p-5 shadow">
-          <div class="flex items-center justify-between gap-4">
-            <div>
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div class="min-w-0">
               <p class="font-semibold">Du bist bereits angemeldet</p>
-              <p id="user-email" class="text-sm text-base-content/70"></p>
+              <p id="user-email" class="truncate text-sm text-base-content/70"></p>
             </div>
             <div id="user-button"></div>
           </div>
@@ -35,8 +35,8 @@
         </div>
       </section>
 
-      <section class="card bg-base-100 shadow">
-        <div class="card-body">
+      <section class="card min-w-0 bg-base-100 shadow">
+        <div class="card-body p-4 sm:p-8">
           <div id="clerk-status" class="alert">
             <span>Registrierung wird geladen...</span>
           </div>

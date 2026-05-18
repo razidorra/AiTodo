@@ -1,6 +1,6 @@
 # Agent Rules
 
-Stand: 2026-05-14
+Stand: 2026-05-15
 
 ## Projektziel
 
@@ -227,6 +227,7 @@ Das Frontend liegt unter `public/` und wird von Express statisch ausgeliefert.
 9. Todo-Requests aus dem Frontend senden immer `X-Todo-Owner`.
 10. Eingeloggte Todo-Listen verwenden `user:<email>`, Gastlisten verwenden `guest:<username>`.
 11. Gäste dürfen per Gast-Username eigene Todo-Listen nutzen; der Username wird nur lokal im Browser gespeichert.
+12. Responsive Layouts müssen auf kleinen Bildschirmen ohne horizontales Überlaufen funktionieren; Header-Aktionen, Formulare, Filter, Stats und dynamische Karten sollen umbrechen oder volle Breite nutzen.
 
 ## TypeScript Regeln
 
@@ -297,7 +298,7 @@ Implementiert:
 13. Helmet Security Middleware
 14. API-Tests mit Vitest und Supertest
 15. Auth Register und Login mit JWT
-16. Responsive DaisyUI-Frontend unter `/`
+16. Responsive DaisyUI-Frontend unter `/` mit mobilen Header-Aktionen, Stats, Filtern, Formularen und Todo-Karten
 17. Clerk Registrierung unter `/register`
 18. Clerk Login unter `/login`
 19. Client-Config unter `/api/client-config`
