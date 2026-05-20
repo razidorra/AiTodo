@@ -1,6 +1,6 @@
 # Agent Rules
 
-Stand: 2026-05-15
+Stand: 2026-05-20
 
 ## Projektziel
 
@@ -27,13 +27,15 @@ ESLint
 DaisyUI
 Tailwind Browser CDN
 ClerkJS
+Clerk UI Bundle
 ```
 
 ## Aktuelle Scripts
 
 ```txt
 npm start           startet dist/index.js
-npm run build       kompiliert TypeScript nach dist/
+npm run build       kompiliert Backend-TypeScript nach dist/ und Frontend-TypeScript nach public/*.js
+npm run build:frontend kompiliert nur public/*.ts nach public/*.js
 npm run dev         startet index.ts mit nodemon und ts-node
 npm run lint        prüft den Code mit ESLint
 npm test            startet Vitest einmalig
@@ -47,15 +49,17 @@ npm run test:watch  startet Vitest im Watch Mode
 3. Keine unnötigen Refactorings.
 4. Keine fremden Änderungen überschreiben.
 5. TypeScript verwenden, keine neuen `.js` Dateien in `src/` oder `tests/`.
-6. Jede neue Fachfunktion bekommt einen eigenen Ordner unter `src/features`.
-7. Gemeinsam genutzter Code kommt nach `src/shared`.
-8. Konfiguration kommt nach `src/config`.
-9. Datenbankzugriff kommt nach `src/database` oder in das jeweilige Feature-Repository.
-10. Nach Code-Änderungen `npm run build`, `npm run lint` und passende Tests ausführen.
-11. Secrets niemals in Frontend-Code oder Responses ausgeben.
-12. `JWT_SECRET` bleibt Pflicht und bekommt keinen hardcodierten Fallback.
-13. `CLERK_SECRET_KEY` gehört nicht in Browser-Code. Für Clerk-Frontend nur Publishable Keys verwenden.
-14. Todo-Listen dürfen nicht global geteilt werden. Jeder Todo-Zugriff braucht einen Besitzer-Kontext.
+6. Frontend-Quellen unter `public/` werden in `.ts` gepflegt; die `.js` Dateien dort sind Browser-Output für die HTML-Seiten.
+7. Keine neuen handgeschriebenen `.js` Dateien in `public/`, außer es ist bewusst generierter Output oder eine externe Vorgabe.
+8. Jede neue Fachfunktion bekommt einen eigenen Ordner unter `src/features`.
+9. Gemeinsam genutzter Code kommt nach `src/shared`.
+10. Konfiguration kommt nach `src/config`.
+11. Datenbankzugriff kommt nach `src/database` oder in das jeweilige Feature-Repository.
+12. Nach Code-Änderungen `npm run build`, `npm run lint` und passende Tests ausführen.
+13. Secrets niemals in Frontend-Code oder Responses ausgeben.
+14. `JWT_SECRET` bleibt Pflicht und bekommt keinen hardcodierten Fallback.
+15. `CLERK_SECRET_KEY` gehört nicht in Browser-Code. Für Clerk-Frontend nur Publishable Keys verwenden.
+16. Todo-Listen dürfen nicht global geteilt werden. Jeder Todo-Zugriff braucht einen Besitzer-Kontext.
 
 ## Installierte Skills
 
@@ -90,19 +94,23 @@ skills-lock.json
 index.ts
 public/
   api-client.js
+  api-client.ts
   app.js
+  app.ts
   auth-nav.js
+  auth-nav.ts
   clerk-auth.js
+  clerk-auth.ts
   clerk-client.js
+  clerk-client.ts
   clerk-register.js
+  clerk-register.ts
+  frontend-env.d.ts
   index.html
-  login/
-    index.html
   login.html
-  register/
-    index.html
   register.html
   redirects.js
+  redirects.ts
 src/
   app.ts
   config/
@@ -158,6 +166,7 @@ tests/
 spec.md
 Agent.md
 tsconfig.json
+tsconfig.frontend.json
 package.json
 eslint.config.mjs
 vitest.config.ts
@@ -215,19 +224,21 @@ Nur Code in `src/shared` ablegen, wenn er wirklich von mehreren Features benutzt
 Das Frontend liegt unter `public/` und wird von Express statisch ausgeliefert.
 
 1. HTML-Seiten verwenden DaisyUI/Tailwind-Klassen.
-2. Browser-JavaScript verwendet ES-Module mit `import`.
-3. Gemeinsame Browser-Helfer liegen in eigenen Modulen, zum Beispiel `api-client.js`.
-4. Clerk-Seiten sind getrennt:
+2. Browser-Code wird in TypeScript geschrieben und mit `tsconfig.frontend.json` zu ES-Modulen in `public/*.js` kompiliert.
+3. HTML-Dateien laden die generierten `.js` Dateien; direkte Logikänderungen passieren in den passenden `.ts` Quellen.
+4. Gemeinsame Browser-Helfer liegen in eigenen Modulen, zum Beispiel `api-client.ts`.
+5. Clerk-Seiten sind getrennt:
    - `/register` registriert neue Accounts.
    - `/login` meldet bestehende Accounts an.
-5. Frontend ruft Backend-APIs über `/api/...` auf.
-6. Keine Secrets in `public/` hardcoden.
-7. Clerk-Redirects verwenden `forceRedirectUrl` und `fallbackRedirectUrl`.
-8. ClerkJS v6 muss vor `clerk.load()` das Clerk UI Bundle laden und als `ui: { ClerkUI: window.__internal_ClerkUICtor }` übergeben, wenn gemountete Clerk-Komponenten genutzt werden.
-9. Todo-Requests aus dem Frontend senden immer `X-Todo-Owner`.
-10. Eingeloggte Todo-Listen verwenden `user:<email>`, Gastlisten verwenden `guest:<username>`.
-11. Gäste dürfen per Gast-Username eigene Todo-Listen nutzen; der Username wird nur lokal im Browser gespeichert.
-12. Responsive Layouts müssen auf kleinen Bildschirmen ohne horizontales Überlaufen funktionieren; Header-Aktionen, Formulare, Filter, Stats und dynamische Karten sollen umbrechen oder volle Breite nutzen.
+6. Frontend ruft Backend-APIs über `/api/...` auf.
+7. Keine Secrets in `public/` hardcoden.
+8. Clerk-Redirects verwenden `forceRedirectUrl` und `fallbackRedirectUrl`.
+9. ClerkJS v6 muss vor `clerk.load()` das Clerk UI Bundle laden und als `ui: { ClerkUI: window.__internal_ClerkUICtor }` übergeben, wenn gemountete Clerk-Komponenten genutzt werden.
+10. Todo-Requests aus dem Frontend senden immer `X-Todo-Owner`.
+11. Eingeloggte Todo-Listen verwenden `user:<email>`, Gastlisten verwenden `guest:<username>`.
+12. Gäste dürfen per Gast-Username eigene Todo-Listen nutzen; der Username wird nur lokal im Browser gespeichert.
+13. Responsive Layouts müssen auf kleinen Bildschirmen ohne horizontales Überlaufen funktionieren; Header-Aktionen, Formulare, Filter, Stats und dynamische Karten sollen umbrechen oder volle Breite nutzen.
+14. `public/login/`, `public/register/` und `dist/` sind keine Quellordner. `dist/` ist generierter Backend-Build-Output und wird über `npm run build` neu erzeugt.
 
 ## TypeScript Regeln
 
@@ -238,6 +249,8 @@ Das Frontend liegt unter `public/` und wird von Express statisch ausgeliefert.
 5. Zod ist die Standardlösung für Request-Validation.
 6. Kein `any`, außer es gibt einen sehr guten Grund.
 7. Imports bleiben relativ und nah an der bestehenden Struktur.
+8. Browser-DOM-Zugriffe sollen typisiert werden, zum Beispiel mit `querySelector<T>()` oder kleinen Query-Helpern.
+9. CDN-Module und Browser-Globals, die TypeScript nicht kennt, werden in `public/frontend-env.d.ts` beschrieben.
 
 ## Namensregeln
 
@@ -306,6 +319,7 @@ Implementiert:
 21. Collaborators können per E-Mail hinzugefügt werden
 22. Collaborator-E-Mails sind eindeutig und werden normalisiert
 23. Auth-Registrierung gibt bei doppelter E-Mail `409` zurück, auch bei MongoDB Duplicate-Key-Fehlern
+24. Frontend-Logik ist TypeScript unter `public/*.ts`; die zugehörigen `.js` Dateien werden für den Browser generiert
 
 ## Aktueller Collaborator Feature Stand
 
@@ -350,9 +364,10 @@ Nächste sinnvolle Schritte:
 1. Protected Todo-Routen mit Clerk/JWT Middleware ergänzen.
 2. Repository-Tests mit echter Testdatenbank ergänzen.
 3. Formatting ergänzen.
-4. Environment-Konfiguration bei Bedarf stärker validieren.
-5. `X-Todo-Owner` und `X-Owner-Email` serverseitig aus verifizierten Clerk Tokens ableiten.
-6. Collaborators echten Todo-Listen oder einzelnen Todos zuordnen.
+4. Optional Frontend-Build-Output klarer trennen oder vor `npm start` automatisch erzeugen.
+5. Environment-Konfiguration bei Bedarf stärker validieren.
+6. `X-Todo-Owner` und `X-Owner-Email` serverseitig aus verifizierten Clerk Tokens ableiten.
+7. Collaborators echten Todo-Listen oder einzelnen Todos zuordnen.
 
 ## Definition of Done
 

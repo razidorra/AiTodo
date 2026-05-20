@@ -1,6 +1,6 @@
 # Todo App Specification
 
-Stand: 2026-05-15
+Stand: 2026-05-20
 
 ## Ziel
 
@@ -25,7 +25,7 @@ Bereits umgesetzt:
 13. MongoDB-Verbindung über Mongoose beim Serverstart
 14. Zentrale 404- und Error-Middleware
 15. API-Tests mit Vitest und Supertest
-16. Build-Script mit TypeScript-Ausgabe nach `dist/`
+16. Build-Script mit Backend-TypeScript-Ausgabe nach `dist/` und separatem Frontend-TypeScript-Build
 17. ESLint Setup mit Flat Config
 18. Projekt-Skills für Express REST API, Mongoose/MongoDB und TDD installiert
 19. Statisches responsive HTML-Frontend unter `/` mit DaisyUI und Todo-API-Anbindung
@@ -35,6 +35,8 @@ Bereits umgesetzt:
 23. Frontend-Gäste können einen Gast-Username setzen und damit eine eigene Todo-Liste verwenden
 24. ClerkJS lädt das separate Clerk UI Bundle, damit `mountSignIn` und `mountSignUp` funktionieren
 25. Mobile Layouts brechen Header-Aktionen, Statistikbereich, Filter, Formulare und Todo-Karten sauber um
+26. Browser-Code ist von JavaScript nach TypeScript migriert; `public/*.ts` ist die Quelle, `public/*.js` ist generierter Browser-Output
+27. Redundante Redirect-Ordner `public/login/` und `public/register/` wurden entfernt; Express liefert direkt `public/login.html` und `public/register.html`
 
 Noch offen:
 
@@ -86,6 +88,7 @@ Die Skill-Inhalte werden projektbezogen angewendet:
 ```txt
 npm run dev
 npm run build
+npm run build:frontend
 npm start
 npm run lint
 npm test
@@ -96,7 +99,8 @@ npm run test:watch
 
 ```txt
 npm run dev         startet index.ts mit nodemon und ts-node
-npm run build       kompiliert TypeScript nach dist/
+npm run build       kompiliert Backend-TypeScript nach dist/ und Frontend-TypeScript nach public/*.js
+npm run build:frontend kompiliert nur public/*.ts nach public/*.js
 npm start           startet dist/index.js
 npm run lint        prüft den Code mit ESLint
 npm test            startet Vitest einmalig
@@ -118,19 +122,23 @@ skills-lock.json
 index.ts
 public/
   api-client.js
+  api-client.ts
   app.js
+  app.ts
   auth-nav.js
+  auth-nav.ts
   clerk-auth.js
+  clerk-auth.ts
   clerk-client.js
+  clerk-client.ts
   clerk-register.js
+  clerk-register.ts
+  frontend-env.d.ts
   index.html
-  login/
-    index.html
   login.html
-  register/
-    index.html
   register.html
   redirects.js
+  redirects.ts
 src/
   app.ts
   config/
@@ -186,6 +194,7 @@ tests/
 spec.md
 Agent.md
 tsconfig.json
+tsconfig.frontend.json
 package.json
 eslint.config.mjs
 vitest.config.ts
@@ -587,33 +596,41 @@ Definiert TypeScript-Typen für Personen, die per E-Mail zur Todo-Seite hinzugef
 
 Definiert das responsive DaisyUI-Frontend für TodoFlow mit Aufgaben, Team-Bereich, Statistiken und Navigation. Header-Aktionen, Gast-Username-Formular, Statistikbereich, Filterleiste, Todo-Karten und Collaborator-Formular sind für kleine Bildschirme optimiert und brechen ohne horizontales Quetschen um. Collaborators werden als Workspace-Mitglieder angezeigt, aber nicht automatisch auf einzelnen Aufgaben erwähnt. Gäste können Todos nutzen; Personen hinzufügen ist in der Oberfläche nur für eingeloggte Nutzer freigeschaltet. Die Oberfläche zeigt für hinzugefügte Personen keine E-Mail-Adressen oder internen IDs an.
 
-### `public/app.js`
+### `public/app.ts` und `public/app.js`
 
-Steuert die Todo- und Collaborator-Oberfläche im Browser über die REST API. Dynamisch erzeugte Todo-Karten verwenden responsive Klassen, damit Text und Aktionen auf mobilen Bildschirmen sauber umbrechen.
+Steuert die Todo- und Collaborator-Oberfläche im Browser über die REST API. `public/app.ts` ist die gepflegte TypeScript-Quelle; `public/app.js` ist der von `npm run build:frontend` erzeugte Browser-Output, den die HTML-Seite als ES-Modul lädt. Dynamisch erzeugte Todo-Karten verwenden responsive Klassen, damit Text und Aktionen auf mobilen Bildschirmen sauber umbrechen.
 
-### `public/api-client.js`
+### `public/api-client.ts` und `public/api-client.js`
 
-Kapselt Browser-Requests an die Backend-API und unterstützt lokale Live-Server-Entwicklung mit API-Fallback auf den Express-Port.
+Kapselt Browser-Requests an die Backend-API und unterstützt lokale Live-Server-Entwicklung mit API-Fallback auf den Express-Port. Die TypeScript-Quelle definiert gemeinsame Request- und Client-Config-Typen.
 
 ### `public/login.html` und `public/register.html`
 
 Definieren getrennte responsive Clerk-Seiten für Login und Registrierung. Die Layouts verwenden mobile Abstände, flexible Spaltenbreiten und gekürzte E-Mail-Anzeigen, damit Clerk-Widgets und Account-Hinweise nicht überlaufen.
 
-### `public/clerk-auth.js` und `public/clerk-register.js`
+### `public/clerk-auth.ts` / `public/clerk-register.ts` und generierte `.js` Dateien
 
 Mounten ClerkJS Login bzw. Registrierung mit dem öffentlichen Publishable Key aus `/api/client-config`. Clerk-Redirects verwenden `forceRedirectUrl` und `fallbackRedirectUrl`, damit Login zur Todo-App und Registrierung zur Login-Seite führt.
 
-### `public/redirects.js`
+### `public/redirects.ts` und `public/redirects.js`
 
 Erzeugt die passenden Redirect-Ziele für Express (`:3000`) und lokale Live-Server-Nutzung (`:5500`).
 
-### `public/clerk-client.js`
+### `public/clerk-client.ts` und `public/clerk-client.js`
 
 Erstellt und lädt die ClerkJS-Instanz mit dem Publishable Key.
 
-### `public/auth-nav.js`
+### `public/auth-nav.ts` und `public/auth-nav.js`
 
 Steuert die einfachen Header-Aktionen für Register, Login und Logout.
+
+### `public/frontend-env.d.ts`
+
+Definiert Browser- und Clerk-Typen, die TypeScript für die CDN-basierten Clerk-Imports und `window.__internal_ClerkUICtor` braucht.
+
+### `tsconfig.frontend.json`
+
+Prüft und kompiliert den TypeScript-Code unter `public/` als Browser-ES-Module. Der Output bleibt in `public/*.js`, damit die HTML-Seiten ohne Bundler funktionieren.
 
 ## Validierungsregeln
 
@@ -675,6 +692,7 @@ Getestet wird:
 
 2. Developer Experience verbessern
    - Formatter ergänzen
+   - Optional: Frontend-Build-Output klarer trennen oder vor dem Start automatisch bauen
 
 3. Auth/Todo-Integration ausbauen
    - Todo-Routen mit Clerk/JWT schützen
